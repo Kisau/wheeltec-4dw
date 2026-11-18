@@ -1,0 +1,17 @@
+[Unit]
+Description=Robot ROS 2 rosbridge WebSocket on port 9090
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/robot-rosbridge start
+ExecStop=/usr/local/bin/robot-rosbridge stop
+Restart=always
+RestartSec=10
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target

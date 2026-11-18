@@ -74,6 +74,13 @@ elif name == "python3":
             f.write(json.dumps(["event", "fsm_exit"]) + "\n")
     else:
         code = sys.stdin.read()
+        if 'patrol_uart_startup_check' in code:
+            with open(os.environ['CALLS'], 'a') as f:
+                f.write(json.dumps(['event', 'uart_parameters']) + '\n')
+            if os.environ.get('UART_PARAMETERS_FAIL'):
+                sys.exit(1)
+            if os.environ.get('CANCEL_AFTER_BRIDGE'):
+                pathlib.Path(os.environ['RUNTIME'], 'stop_requested').touch()
         if "get_publishers_info_by_topic" in code and os.environ.get("PUBLISHER"):
             print("existing /cmd_vel publisher", file=sys.stderr)
             sys.exit(1)
@@ -279,6 +286,22 @@ class LauncherTests(unittest.TestCase):
         self.assertTrue(self.commands("wheeltec_uart_bridge_node"))
         self.assertFalse(any("-u" in c for c in self.commands("python3")))
         self.assertIn(["bridge_stop"], self.commands("event"))
+
+    def test_parameter_service_failure_prevents_patrol_start(self):
+        result = self.remote_run('start-patrol', UART_PARAMETERS_FAIL='1')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(['uart_parameters'], self.commands('event'))
+        self.assertFalse(any('-u' in c for c in self.commands('python3')))
+        self.assertIn(['bridge_stop'], self.commands('event'))
+
+    def test_parameter_service_checked_before_patrol(self):
+        result = self.remote_run('start-patrol')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = [json.loads(line) for line in self.calls.read_text().splitlines()]
+        check_index = rows.index(['event', 'uart_parameters'])
+        patrol_index = next(i for i, row in enumerate(rows)
+                            if row[0] == 'python3' and '-u' in row)
+        self.assertLess(check_index, patrol_index)
 
     def test_stale_pid_record_does_not_signal_unrelated_process(self):
         with subprocess.Popen(["sleep", "10"]) as unrelated:

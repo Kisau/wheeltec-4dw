@@ -48,6 +48,7 @@ class ModeStartupTests(unittest.TestCase):
     def test_manual_obstacle_stops_before_logging_original_command(self):
         import json
         n = self.build('STOP')
+        n.manual_lidar_safety = True
         n.mode = 'MANUAL'
         n.manual_received = n.manual_since = 100.
         n.manual_command = (.05, 0.)

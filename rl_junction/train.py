@@ -228,7 +228,7 @@ def main():
         (run/"continuation.json").write_text(json.dumps({
             "source_checkpoint": str(checkpoint), "starting_timesteps": starting_steps,
             "starting_ppo_epoch_updates": starting_updates, "requested_additional_timesteps": args.timesteps}, indent=2))
-        model.set_logger(configure(str(run/"metrics"), ["stdout", "csv", "json"]))
+        model.set_logger(configure(str(run/"metrics"), ["stdout", "csv", "json", "tensorboard"]))
         callbacks = [CriticWarmup(args.critic_warmup_rollouts, run, spec,
                                   args.critic_learning_rate, args.critic_warmup_epochs)]
         if args.eval_every:

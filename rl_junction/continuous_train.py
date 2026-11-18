@@ -125,7 +125,7 @@ def train(args, run):
             n_steps=256,batch_size=64,n_epochs=4,learning_rate=1e-5,clip_range=.1,target_kl=.01)
         reference = PPO.load(args.init_model,device='cpu')
         model.attach_bc(reference.policy,1e-5,.1)
-        model.set_logger(configure(str(run/'metrics'),['stdout','csv','json']))
+        model.set_logger(configure(str(run/'metrics'),['stdout','csv','json','tensorboard']))
         validation = ContinuousValidation(run,spec,raw,interval=2560,episodes=args.eval_episodes,
                                           seed=910000,save_function=save_model)
         model.learn(args.timesteps, reset_num_timesteps=False,callback=[Progress(run,spec),validation])

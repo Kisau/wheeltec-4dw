@@ -1,10 +1,22 @@
 # 路口機器學習實驗
 
+新的模型訓練一律記錄 TensorBoard；操作與 checkpoint 接續見 [TENSORBOARD.md](TENSORBOARD.md)。
+
 目標是混合導航：長距離直線由傳統控制處理，模型從路口減速開始，
 自主完成左轉、右轉或倒退穿越，進入正確走道後再交回直線控制。
 目前主要開發 **連續路口控制模式**，尚未完成 Gazebo 閉迴路驗證與實車部署。
 
 ## 目前入口
+
+新版右先左後巡邏的 **轉彎 BC＋直線 FSM** 起始實驗，見 [TURN_ONLY_BC.md](TURN_ONLY_BC.md)。它使用獨立模型契約與入口，與下列舊三任務的連續路口實驗分開。
+
+多樣化示範的轉彎 BC 重訓與新舊模型同情境比較，見 [DIVERSE_TURN_BC.md](DIVERSE_TURN_BC.md)。
+
+新增修正示範與完整轉彎雙動作 BC 的獨立對照，見 [FULL_JUNCTION_BC.md](FULL_JUNCTION_BC.md)；直線 FSM 與外部安全保留。
+
+針對提前轉向、出彎偏離與近零速度卡點的階段條件版本，見 [PHASE_JUNCTION_BC.md](PHASE_JUNCTION_BC.md)；保留先前失敗版本與對照紀錄。
+
+下一版完整路口模型的多樣化實體模擬示範，見 [ROUGH_DEMOS.md](ROUGH_DEMOS.md)；使用新的四任務、159 維觀測與雙動作資料，保留目前轉彎模型。
 
 | 用途 | 程式／說明 |
 | --- | --- |
@@ -60,3 +72,7 @@
 - [恢復示範／DAgger](docs/history/RECOVERY_BC.md)
 - [早期驗證](docs/history/VERIFICATION.md)、[v6 驗證](docs/history/V6_VERIFICATION.md)
 - [此次整理內容](docs/CLEANUP.md)
+
+- [停止後牆面恢復與左轉修正](PHASE_RECOVERY.md)
+
+- [凍結 BC＋有界 residual PPO：示範、訓練與物理擾動比較](RESIDUAL_PHASE.md)

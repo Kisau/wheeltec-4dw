@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+case "${1:-start}" in
+start)
+    docker start robot-dev >/dev/null
+    exec docker exec robot-dev setsid --wait bash --noprofile --norc -c '
+        set -eo pipefail
+        for setup in /opt/ros/humble/install/setup.bash /opt/ros/humble/setup.bash; do
+            if [[ -r "$setup" ]]; then source "$setup"; break; fi
+        done
+        source /workspace/install_humble_rosbridge/local_setup.bash
+        export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+        echo $$ > /run/robot-rosbridge.pid
+        exec ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:=9090 address:=0.0.0.0
+    '
+    ;;
+stop)
+    docker exec robot-dev bash --noprofile --norc -c '
+        if [[ -r /run/robot-rosbridge.pid ]]; then
+            read -r pid < /run/robot-rosbridge.pid
+            if [[ "$pid" =~ ^[0-9]+$ ]] && [[ -r /proc/$pid/cmdline ]] &&
+                tr "\0" " " < /proc/$pid/cmdline | grep -q "rosbridge_websocket_launch.xml"; then
+                kill -INT -- "-$pid"
+                for ((i=0; i<100; i++)); do
+                    kill -0 -- "-$pid" 2>/dev/null || break
+                    sleep 0.1
+                done
+                kill -TERM -- "-$pid" 2>/dev/null || true
+            fi
+            rm -f /run/robot-rosbridge.pid
+        fi
+    '
+    ;;
+*) exit 2 ;;
+esac

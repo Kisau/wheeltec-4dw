@@ -14,6 +14,16 @@ def prepare(world_file, robot_file, output_dir, *, rtf=None, lidar_only=False):
     world = world_tree.getroot().find("world")
     if world is None:
         raise ValueError("Expected an SDF file containing a world")
+    # The prepared world lives in /tmp. Preserve local mesh / texture paths
+    # against the source directory before Gazebo resolves relative resources.
+    source_directory = Path(world_file).resolve().parent
+    for element in world.iter():
+        if element.tag in ("uri", "albedo_map", "normal_map", "roughness_map", "metalness_map"):
+            value = (element.text or "").strip()
+            if value and "://" not in value:
+                candidate = source_directory / value
+                if candidate.is_file():
+                    element.text = candidate.resolve().as_uri()
     if rtf is not None:
         physics = next((p for p in world.findall("physics") if p.get("default") in ("1", "true")),
                        world.find("physics"))

@@ -400,8 +400,38 @@ if [ "$ready" != true ]; then
     echo "串口未確認開啟；不啟動巡邏。" >&2
     exit 1
 fi
-ros2 param get /wheeltec_uart_bridge max_linear_x 9>&-
-ros2 param get /wheeltec_uart_bridge max_angular_z 9>&-
+# Serial-open confirmation does not imply DDS parameter discovery is ready.
+# Query directly, without the CLI daemon's cached graph.
+timeout --signal=TERM --kill-after=2s 25s python3 - 9>&- <<'UART_PARAMETERS'
+import math
+import rclpy
+from rcl_interfaces.msg import ParameterType
+from rcl_interfaces.srv import GetParameters
+
+rclpy.init()
+node = rclpy.create_node("patrol_uart_startup_check")
+try:
+    client = node.create_client(GetParameters, "/wheeltec_uart_bridge/get_parameters")
+    print("Waiting for UART parameter service (up to 15 seconds)", flush=True)
+    if not client.wait_for_service(timeout_sec=15.0):
+        raise RuntimeError("UART parameter service unavailable after 15 seconds")
+    names = ["max_linear_x", "max_angular_z"]
+    future = client.call_async(GetParameters.Request(names=names))
+    rclpy.spin_until_future_complete(node, future, timeout_sec=5.0)
+    if not future.done():
+        raise RuntimeError("UART parameter response timed out")
+    response = future.result()
+    if response is None or len(response.values) != len(names):
+        raise RuntimeError("Invalid UART parameter response")
+    for name, value in zip(names, response.values):
+        if (value.type != ParameterType.PARAMETER_DOUBLE or
+                not math.isfinite(value.double_value) or value.double_value <= 0):
+            raise RuntimeError("Invalid UART limit: " + name)
+        print("UART " + name + "=" + str(value.double_value), flush=True)
+finally:
+    node.destroy_node()
+    rclpy.shutdown()
+UART_PARAMETERS
 check_cancelled
 if [ "$action" = start-patrol ] || [ "$action" = start-modes ]; then
     if [ "$action" = start-modes ]; then

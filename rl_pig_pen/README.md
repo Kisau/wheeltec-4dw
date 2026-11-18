@@ -403,14 +403,20 @@ Gazebo 真實位置與地圖可用於訓練標籤、獎勵及評估；部署模�
 | --- | --- |
 | `STOP` | 啟動預設；持續送零速度，保留未被手控接管的任務進度 |
 | `AUTO` | 現有 LiDAR 狀態機巡邏，保留拍攝停車、障礙與雷達保護 |
-| `MANUAL` | 只接收 `/manual/cmd_vel`；保留雷達淨空檢查，不自動退避 |
+| `MANUAL` | 只接收 `/manual/cmd_vel`；預設略過光達障礙、新鮮度與有效性檢查，不自動退避 |
 
 每次有效的模式切換先送零速度。STOP 是軟體保持停止，不是實體急停或已停穩回授。
-無有效雷達不可進入移動模式；手控下雷達過期、無效速度、障礙或外部停車會切成 STOP，
-不會在障礙移開後自行恢復手控。手控首次指令須於切入後 0.5 秒內抵達，後續逾時也會
+AUTO 仍須有效雷達與安全淨空。MANUAL 預設 `manual_lidar_safety=false`，切入與移動均
+不受光達阻擋，因此可朝障礙物移動；速度上限、無效速度、外部停車與指令逾時保護保留。
+若需恢復手控光達保護，啟動時傳入 `-p manual_lidar_safety:=true` 並重啟控制節點；
+此時雷達過期、無效或障礙會切成 STOP，不會在障礙移開後自行恢復手控。
+`/control/status` 的 `manual_lidar_safety` 顯示實際設定。
+手控首次指令須於切入後 0.5 秒內抵達，後續逾時也會
 進入 STOP；重複要求 MANUAL 不會延長期限。非 MANUAL 時收到的速度不排隊。
 
-手控預設限速為 0.10 m/s、0.30 rad/s；新入口的總輸出上限為 0.20 m/s、0.60 rad/s。
+手控預設限速為 2.0 m/s、0.60 rad/s；AUTO 輸出上限維持 0.20 m/s、0.60 rad/s。
+手控線速由 `manual_max_linear` 獨立限制；UART 共用線速上限為 2.0 m/s。
+2.0 m/s 僅為軟體指令上限，尚未確認此底盤額定速度或完成該速度的實車驗證。
 可用啟動參數 `manual_max_linear`、`manual_max_angular`、`max_linear`、`max_angular`、
 `manual_timeout` 調整（有限正值）。UART bridge 的自身上限仍然有效。
 新節點與舊節點名稱均為 `/pig_pen_lidar_patrol`，同時只能選一個入口。
@@ -502,11 +508,11 @@ ros2 service call /control/set_mode rcl_interfaces/srv/SetParametersAtomically \
 這是操作者接管，不沿用拍攝停車「等到合適路段才停」的延後規則。
 系統先下達零速度，再檢查是否接受交接；不是已量測到車身停穩的保證。
 
-- 雷達必須有效且新鮮，車體安全範圍必須淨空。
+- 僅在 `manual_lidar_safety=true` 時，手控接管要求雷達有效、新鮮且車體安全範圍淨空。
 - 已進入 DONE／FAILED 時不能直接切手控，不能用切模式繞過鎖定故障。
 - 有效的切換請求若因上述條件遭拒，會保持 STOP，不繼續原本巡邏；格式錯誤的請求
   則直接拒絕，不改模式。
-- 手控仍有安全檢查：雷達異常、危險移動方向或外部停車要求可能使其回到 STOP。
+- 手控保留指令逾時與外部停止；`manual_lidar_safety=true` 時另保留雷達及障礙檢查。
 - 預設 0.5 秒指令逾時，因此不要只切 MANUAL 後慢慢輸入速度指令。
   `MANUAL: WAITING_MANUAL_COMMAND` 只代表接受切換，不代表車子已開始移動。
 - 同一時間只使用一個手控速度發布器。不要直接發到最終 `/cmd_vel`，以免繞過模式管理。
@@ -852,5 +858,22 @@ ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:=9090 address:=
 
 筆電連 `ws://192.168.50.236:9090`（實際 Wi-Fi IP 變動時需更新），之後確認
 `/control/status`、`/control/set_mode`、`/manual/cmd_vel` 的介面，勿直接發布最終 `/cmd_vel`。
-目前 rosbridge 尚未加入開機服務；手動啟動成功後再安排自動啟動。僅 9090 可連不等於
-模式切換、手控速度或逾時停止已完成驗證。
+僅 9090 可連不等於模式切換、手控速度或逾時停止已完成驗證。
+
+永久啟動：將新版 `scripts/setup_rosbridge_service.sh` 與 `scripts/systemd/` 一起同步到
+Xavier 專案目錄，先將手動啟動的 rosbridge 用 Ctrl-C 關閉，再在 **Xavier 主機**執行：
+
+```bash
+sudo bash /home/yu/Desktop/pig_patrol/scripts/setup_rosbridge_service.sh
+sudo systemctl is-enabled robot-rosbridge
+sudo journalctl -u robot-rosbridge -n 40 --no-pager
+sudo ss -ltnp 'sport = :9090'
+```
+
+安裝器要求既有 `robot-dev` 使用 host 網路、rosbridge overlay 已建置。
+服務開機會啟動容器，只啟動 rosbridge；失敗每 10 秒重試。若曾設定 ROS_DOMAIN_ID，
+須確認容器中的值與控制節點相同。沒有修改防火牆或 Wi-Fi 設定。
+重開機後再次檢查上述指令，筆電 PowerShell 執行
+`Test-NetConnection 192.168.50.236 -Port 9090`，確認 `TcpTestSucceeded : True`。
+若 Xavier 本機已監聽而筆電仍連不上，再檢查實際 IP 與防火牆。
+停止及取消開機啟動：`sudo systemctl disable --now robot-rosbridge`。

@@ -41,10 +41,14 @@ class ModeControlNode(LidarPatrolNode):
         self.auto_started = False
         super().__init__()
         self.manual_timeout = self._positive_parameter("manual_timeout", .5)
+        self.manual_lidar_safety = self.declare_parameter("manual_lidar_safety", False).value
+        if not isinstance(self.manual_lidar_safety, bool):
+            raise ValueError("manual_lidar_safety must be boolean")
         self.max_linear = self._positive_parameter("max_linear", .2)
         self.max_angular = self._positive_parameter("max_angular", .6)
-        self.manual_linear = min(self.max_linear, self._positive_parameter("manual_max_linear", .1))
-        self.manual_angular = min(self.max_angular, self._positive_parameter("manual_max_angular", .3))
+        # Manual and AUTO linear limits are independent; UART caps both paths.
+        self.manual_linear = self._positive_parameter("manual_max_linear", 2.0)
+        self.manual_angular = min(self.max_angular, self._positive_parameter("manual_max_angular", .6))
         self.control_pub = self.create_publisher(String, "/control/status", QoSProfile(
             depth=1, reliability=ReliabilityPolicy.RELIABLE,
             durability=DurabilityPolicy.TRANSIENT_LOCAL))
@@ -86,6 +90,7 @@ class ModeControlNode(LidarPatrolNode):
             self.control_pub.publish(String(data=json.dumps({
                 "mode": self.mode, "route_state": self.controller.state,
                 "reason": self.mode_reason, "restart_required": self.needs_restart,
+                "manual_lidar_safety": self.manual_lidar_safety,
                 "commanded_motion": motion, "linear_x": v, "angular_z": w,
                 "physical_stop_confirmed": False}, ensure_ascii=False)))
 
@@ -151,13 +156,14 @@ class ModeControlNode(LidarPatrolNode):
             return reply(True, "Already " + target)
         # Every valid takeover first stops, including a refused AUTO request.
         self._stop("SWITCHING_MODE")
-        if not self._fresh():
+        require_lidar = target == "AUTO" or self.manual_lidar_safety
+        if require_lidar and not self._fresh():
             self.mode_reason = "SCAN_NOT_READY"
             return reply(False, self.mode_reason)
         if self.controller.state in self.controller.TERMINAL:
             self.mode_reason = "RESET_AT_START_REQUIRED"
             return reply(False, self.mode_reason)
-        if safe_command((0., 0.), self.features, self.controller.cfg, allow_reverse=True)[1]:
+        if require_lidar and safe_command((0., 0.), self.features, self.controller.cfg, allow_reverse=True)[1]:
             self.mode_reason = "FOOTPRINT_BLOCKED"
             return reply(False, self.mode_reason)
         if target == "AUTO":
@@ -232,10 +238,13 @@ class ModeControlNode(LidarPatrolNode):
         since = self.manual_received if self.manual_received is not None else self.manual_since
         if since is None or now - since >= self.manual_timeout:
             self._stop("MANUAL_TIMEOUT")
-        elif not self._fresh():
+        elif self.manual_lidar_safety and not self._fresh():
             self._stop("SCAN_NOT_READY")
         elif self.pig_stop_gate.reason(now) is not None:
             self._stop("EXTERNAL_STOP")
+        elif not self.manual_lidar_safety:
+            self.mode_reason = "MANUAL_COMMAND" if self.manual_received is not None else "WAITING_MANUAL_COMMAND"
+            self._emit(self.manual_command)
         else:
             # Reaction horizon includes scan aging plus the 0.1 s watchdog.
             command, blocked = safe_command(self.manual_command, self.features,
@@ -260,6 +269,9 @@ class ModeControlNode(LidarPatrolNode):
                 self._stop("EXTERNAL_STOP")
 
     def on_scan(self, scan):
+        if self.mode == "MANUAL" and not self.manual_lidar_safety:
+            self._manual_output()
+            return
         now = time.monotonic()
         if (self.mode == "MANUAL" and self.features_received is not None and
                 now - self.features_received > self.MAX_RECEIVE_PAUSE):

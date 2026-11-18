@@ -6,6 +6,7 @@ HEADLESS=false
 ENV_ID=""
 TARGET_RTF=""
 LIDAR_ONLY=false
+SPAWN_Z=0.05
 TEMP_SCENE_DIR=""
 WORLD_FILE="$DIR/../worlds/pig_pen_16units.world"
 while [[ $# -gt 0 ]]; do
@@ -14,9 +15,16 @@ while [[ $# -gt 0 ]]; do
         --env-id)   ENV_ID="$2"; shift 2 ;;
         --rtf) TARGET_RTF="$2"; shift 2 ;;
         --lidar-only) LIDAR_ONLY=true; shift ;;
+        --spawn-z) SPAWN_Z="$2"; shift 2 ;;
         *)          WORLD_FILE="$1"; shift ;;
     esac
 done
+python3 - "$SPAWN_Z" <<'PY'
+import math, sys
+z = float(sys.argv[1])
+if not math.isfinite(z) or not 0 <= z <= 2:
+    raise SystemExit('--spawn-z must be finite and between 0 and 2 metres')
+PY
 
 LOG_DIR="$DIR/../logs"
 if [[ -n "$ENV_ID" ]]; then
@@ -150,7 +158,7 @@ sleep 1
 if [[ -f "$URDF" && -x "$DIR/spawn_robot.sh" ]]; then
     echo "Spawning robot..."
     start_background spawn.log bash "$DIR/spawn_robot.sh" --file "$URDF" --model "$MODEL" \
-        --pos 0 -11.3 0.05 --yaw 1.5708
+        --pos 0 -11.3 "$SPAWN_Z" --yaw 1.5708
 fi
 
 if [[ "$HEADLESS" == "false" && "$LIDAR_ONLY" == "false" ]] && [[ -f "$DIR/aruco_face_detector.py" ]]; then

@@ -1,0 +1,430 @@
+{
+  "source": "pig_pen_16units.world",
+  "world": "pig_pen_16units_rough.world",
+  "raised_m": 0.06,
+  "ramp_run_m": 0.15,
+  "ramp_slope_deg": 21.80140948635181,
+  "roughness_amplitude_m": 0.003,
+  "friction_range": [
+    0.55,
+    0.85
+  ],
+  "gravel_diameter_m": [
+    0.005,
+    0.01
+  ],
+  "gravel_exposed_height_m": [
+    0.001,
+    0.003
+  ],
+  "gravel_texture_tile_m": 0.128,
+  "contact_model": "explicit closed 3D grains merged into static collision and visual STL; embedded, not loose bodies",
+  "grains_per_tile": 96,
+  "physical_grains": 272103,
+  "spawn_z": 0.11,
+  "calibration": "provisional, not measured real-floor parameters",
+  "surfaces": [
+    {
+      "name": "rough_main_0_west",
+      "bounds": [
+        -0.6,
+        0.0,
+        -11.865,
+        -3.09
+      ],
+      "friction": 0.65,
+      "vertices": 1998,
+      "triangles": 3992,
+      "physical_gravel": {
+        "grains": 30697,
+        "triangles": 372356,
+        "base_triangles": 3992,
+        "collision_file": "rough_main_0_west_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            -0.594963679254031,
+            -11.848936160513267
+          ],
+          "base_height_m": 0.06,
+          "diameter_m": 0.007268354317947871,
+          "exposed_height_m": 0.0018164981240150965
+        }
+      }
+    },
+    {
+      "name": "rough_main_0_east",
+      "bounds": [
+        0.0,
+        0.6,
+        -11.865,
+        -3.09
+      ],
+      "friction": 0.85,
+      "vertices": 1998,
+      "triangles": 3992,
+      "physical_gravel": {
+        "grains": 30765,
+        "triangles": 373172,
+        "base_triangles": 3992,
+        "collision_file": "rough_main_0_east_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            0.04503632074596898,
+            -11.848936160513267
+          ],
+          "base_height_m": 0.06,
+          "diameter_m": 0.007268354317947871,
+          "exposed_height_m": 0.0018164981240150965
+        }
+      }
+    },
+    {
+      "name": "rough_main_1_west",
+      "bounds": [
+        -0.6,
+        0.0,
+        -3.09,
+        3.09
+      ],
+      "friction": 0.55,
+      "vertices": 1422,
+      "triangles": 2840,
+      "physical_gravel": {
+        "grains": 21592,
+        "triangles": 261944,
+        "base_triangles": 2840,
+        "collision_file": "rough_main_1_west_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            -0.5778689544170964,
+            -3.076820024868469
+          ],
+          "base_height_m": 0.06,
+          "diameter_m": 0.0099268322782875,
+          "exposed_height_m": 0.00279952059677553
+        }
+      }
+    },
+    {
+      "name": "rough_main_1_east",
+      "bounds": [
+        0.0,
+        0.6,
+        -3.09,
+        3.09
+      ],
+      "friction": 0.75,
+      "vertices": 1422,
+      "triangles": 2840,
+      "physical_gravel": {
+        "grains": 21641,
+        "triangles": 262532,
+        "base_triangles": 2840,
+        "collision_file": "rough_main_1_east_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            0.06213104558290358,
+            -3.076820024868469
+          ],
+          "base_height_m": 0.06,
+          "diameter_m": 0.0099268322782875,
+          "exposed_height_m": 0.00279952059677553
+        }
+      }
+    },
+    {
+      "name": "rough_main_2_west",
+      "bounds": [
+        -0.6,
+        0.0,
+        3.09,
+        11.865
+      ],
+      "friction": 0.65,
+      "vertices": 1998,
+      "triangles": 3992,
+      "physical_gravel": {
+        "grains": 30699,
+        "triangles": 372380,
+        "base_triangles": 3992,
+        "collision_file": "rough_main_2_west_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            -0.594963679254031,
+            3.1270638394867327
+          ],
+          "base_height_m": 0.06,
+          "diameter_m": 0.007268354317947871,
+          "exposed_height_m": 0.0018164981240150965
+        }
+      }
+    },
+    {
+      "name": "rough_main_2_east",
+      "bounds": [
+        0.0,
+        0.6,
+        3.09,
+        11.865
+      ],
+      "friction": 0.85,
+      "vertices": 1998,
+      "triangles": 3992,
+      "physical_gravel": {
+        "grains": 30766,
+        "triangles": 373184,
+        "base_triangles": 3992,
+        "collision_file": "rough_main_2_east_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            0.04503632074596898,
+            3.1270638394867327
+          ],
+          "base_height_m": 0.06,
+          "diameter_m": 0.007268354317947871,
+          "exposed_height_m": 0.0018164981240150965
+        }
+      }
+    },
+    {
+      "name": "entrance_ramp_1_west",
+      "bounds": [
+        -0.75,
+        -0.6,
+        -6.675,
+        -5.685
+      ],
+      "friction": 0.75,
+      "vertices": 84,
+      "triangles": 164,
+      "physical_gravel": null
+    },
+    {
+      "name": "rough_branch_1_west",
+      "bounds": [
+        -3.825,
+        -0.75,
+        -6.675,
+        -5.685
+      ],
+      "friction": 0.6,
+      "vertices": 1120,
+      "triangles": 2236,
+      "physical_gravel": {
+        "grains": 17673,
+        "triangles": 214312,
+        "base_triangles": 2236,
+        "collision_file": "rough_branch_1_west_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            -3.7778689544170962,
+            -6.660820024868469
+          ],
+          "base_height_m": 0,
+          "diameter_m": 0.0099268322782875,
+          "exposed_height_m": 0.00279952059677553
+        }
+      }
+    },
+    {
+      "name": "entrance_ramp_1_east",
+      "bounds": [
+        0.6,
+        0.75,
+        -6.675,
+        -5.685
+      ],
+      "friction": 0.75,
+      "vertices": 84,
+      "triangles": 164,
+      "physical_gravel": null
+    },
+    {
+      "name": "rough_branch_1_east",
+      "bounds": [
+        0.75,
+        3.825,
+        -6.675,
+        -5.685
+      ],
+      "friction": 0.8,
+      "vertices": 1120,
+      "triangles": 2236,
+      "physical_gravel": {
+        "grains": 17689,
+        "triangles": 214504,
+        "base_triangles": 2236,
+        "collision_file": "rough_branch_1_east_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            0.7672060251079381,
+            -6.6613570233661505
+          ],
+          "base_height_m": 0,
+          "diameter_m": 0.008458943746388555,
+          "exposed_height_m": 0.0022614262466651228
+        }
+      }
+    },
+    {
+      "name": "entrance_ramp_2_west",
+      "bounds": [
+        -0.75,
+        -0.6,
+        -0.495,
+        0.495
+      ],
+      "friction": 0.75,
+      "vertices": 84,
+      "triangles": 164,
+      "physical_gravel": null
+    },
+    {
+      "name": "rough_branch_2_west",
+      "bounds": [
+        -3.825,
+        -0.75,
+        -0.495,
+        0.495
+      ],
+      "friction": 0.6,
+      "vertices": 1120,
+      "triangles": 2236,
+      "physical_gravel": {
+        "grains": 17698,
+        "triangles": 214612,
+        "base_triangles": 2236,
+        "collision_file": "rough_branch_2_west_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            -3.794963679254031,
+            -0.45693616051326746
+          ],
+          "base_height_m": 0,
+          "diameter_m": 0.007268354317947871,
+          "exposed_height_m": 0.0018164981240150965
+        }
+      }
+    },
+    {
+      "name": "entrance_ramp_2_east",
+      "bounds": [
+        0.6,
+        0.75,
+        -0.495,
+        0.495
+      ],
+      "friction": 0.75,
+      "vertices": 84,
+      "triangles": 164,
+      "physical_gravel": null
+    },
+    {
+      "name": "rough_branch_2_east",
+      "bounds": [
+        0.75,
+        3.825,
+        -0.495,
+        0.495
+      ],
+      "friction": 0.8,
+      "vertices": 1120,
+      "triangles": 2236,
+      "physical_gravel": {
+        "grains": 17714,
+        "triangles": 214804,
+        "base_triangles": 2236,
+        "collision_file": "rough_branch_2_east_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            0.7550385096698546,
+            -0.43935126931409896
+          ],
+          "base_height_m": 0,
+          "diameter_m": 0.0061502347602599055,
+          "exposed_height_m": 0.0016650806182757962
+        }
+      }
+    },
+    {
+      "name": "entrance_ramp_3_west",
+      "bounds": [
+        -0.75,
+        -0.6,
+        5.685,
+        6.675
+      ],
+      "friction": 0.75,
+      "vertices": 84,
+      "triangles": 164,
+      "physical_gravel": null
+    },
+    {
+      "name": "rough_branch_3_west",
+      "bounds": [
+        -3.825,
+        -0.75,
+        5.685,
+        6.675
+      ],
+      "friction": 0.6,
+      "vertices": 1120,
+      "triangles": 2236,
+      "physical_gravel": {
+        "grains": 17577,
+        "triangles": 213160,
+        "base_triangles": 2236,
+        "collision_file": "rough_branch_3_west_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            -3.7960358731675834,
+            5.697592878710324
+          ],
+          "base_height_m": 0,
+          "diameter_m": 0.00696207700727736,
+          "exposed_height_m": 0.0014741775959387817
+        }
+      }
+    },
+    {
+      "name": "entrance_ramp_3_east",
+      "bounds": [
+        0.6,
+        0.75,
+        5.685,
+        6.675
+      ],
+      "friction": 0.75,
+      "vertices": 84,
+      "triangles": 164,
+      "physical_gravel": null
+    },
+    {
+      "name": "rough_branch_3_east",
+      "bounds": [
+        0.75,
+        3.825,
+        5.685,
+        6.675
+      ],
+      "friction": 0.8,
+      "vertices": 1120,
+      "triangles": 2236,
+      "physical_gravel": {
+        "grains": 17592,
+        "triangles": 213340,
+        "base_triangles": 2236,
+        "collision_file": "rough_branch_3_east_gravel.stl",
+        "probe_grain": {
+          "centre_m": [
+            0.7550385096698546,
+            5.704648730685901
+          ],
+          "base_height_m": 0,
+          "diameter_m": 0.0061502347602599055,
+          "exposed_height_m": 0.0016650806182757962
+        }
+      }
+    }
+  ]
+}
